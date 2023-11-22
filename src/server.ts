@@ -1,7 +1,8 @@
 import app from "./app";
-import config from "./config/config";
+
 // getting-started.js
 import mongoose from "mongoose";
+import config from "./app/config/config";
 
 async function main() {
   try {
