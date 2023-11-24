@@ -36,6 +36,7 @@ const getSingleUserFromDB = async (userId: number) => {
   );
   return result;
 };
+
 // delete
 const deleteUserFromDB = async (userId: number) => {
   // Use static method to check if the user exists
@@ -51,10 +52,17 @@ const deleteUserFromDB = async (userId: number) => {
 };
 
 const updateUserFromDB = async (userId: number, userData: Partial<IUser>) => {
-  const result = await User.findByIdAndUpdate(userId, userData, {
-    new: true,
-    runValidators: true,
-  });
+  // Use static method to check if the user exists
+  const userExists = await User.isUserExists(userId);
+
+  if (!userExists) {
+    throw new Error("User not found");
+  }
+  const result = await User.updateOne(
+    { userId },
+    { $set: userData },
+    { new: true }
+  );
   return result;
 };
 

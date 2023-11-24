@@ -20,7 +20,7 @@ const createUser = async (req: Request, res: Response) => {
 
     const result = await UserServices.createUserIntoDB(userData);
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
       message: "User Created Successfully!",
       data: result,
@@ -104,15 +104,17 @@ const deleteUser = async (req: Request, res: Response) => {
 
 const updateUser = async (req: Request, res: Response) => {
   try {
-    const userData = req.body;
+    const userData  = req.body.user;
     const parseId = parseInt(req.params.userId);
+    
 
-    await UserServices.updateUserFromDB(parseId, userData);
+    const result = await UserServices.updateUserFromDB(parseId, userData);
+    console.log('ack',result);
 
     res.status(200).json({
       success: true,
       message: "User updated successfully!",
-      data: null,
+      data: result,
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
