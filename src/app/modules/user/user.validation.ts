@@ -12,25 +12,26 @@ const UserAddressValidationSchema = Joi.object({
   country: Joi.string().min(1).max(255),
 });
 
-// Subtype for Joi validation
-// const UserOrdersValidationSchema = Joi.object({
-//   productName: Joi.string().min(1).max(255),
-//   price: Joi.number(),
-//   quantity: Joi.number().integer(),
-// });
+//Subtype for Joi validation
+const UserOrdersValidationSchema = Joi.object({
+  productName: Joi.string().min(1).max(255),
+  price: Joi.number(),
+  quantity: Joi.number().integer(),
+});
 
 // Main Joi validation schema
 const UserValidationSchema = Joi.object({
-  userId: Joi.number().integer(),
+  userId: Joi.number(),
   username: Joi.string().min(1).max(200),
   password: Joi.string().min(1).max(20),
   fullName: UsernameValidationSchema,
   age: Joi.number().integer(),
-  email: Joi.string().email(),
+  email: Joi.string().email().required(),
   isActive: Joi.boolean(),
-  hobbies: Joi.string().valid("Traveling", "Playing"),
+  hobbies: Joi.array().items(Joi.string()).min(1),
   address: UserAddressValidationSchema,
-  //   orders: Joi.array().items(UserOrdersValidationSchema),
+  orders: Joi.array().items(UserOrdersValidationSchema),
+
 });
 
 export default UserValidationSchema;

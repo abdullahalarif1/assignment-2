@@ -1,3 +1,6 @@
+/* eslint-disable no-unused-vars */
+import { Model } from "mongoose";
+
 // sub type of user
 export type IUsername = {
   firstName: string;
@@ -27,7 +30,12 @@ export type IUser = {
   age: number;
   email: string;
   isActive: boolean;
-  hobbies: "Traveling" | "Playing"[];
+  hobbies: string[];
   address: IUserAddress;
-  // orders: IUserOrders[];
+  orders: IUserOrders[];
+
 };
+
+export interface UserModel extends Model<IUser> {
+  isUserExists(id: number): Promise<IUser | null>;
+}

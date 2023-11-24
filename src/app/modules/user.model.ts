@@ -2,8 +2,10 @@ import { Schema, model } from "mongoose";
 import {
   IUser,
   IUserAddress,
+  IUserOrders,
   // IUserOrders,
   IUsername,
+  UserModel,
 } from "./user/user.interface";
 import bcrypt from "bcrypt";
 import config from "../config/config";
@@ -34,23 +36,23 @@ const userAddressSchema = new Schema<IUserAddress>({
   },
 });
 
-// const userOrdersSchema = new Schema<IUserOrders>({
-//   productName: {
-//     type: String,
-//     required: [true, "productName is required"],
-//   },
-//   price: {
-//     type: Number,
-//     required: [true, "price is required"],
-//   },
-//   quantity: {
-//     type: Number,
-//     required: [true, "quantity is required"],
-//   },
-// });
+const userOrdersSchema = new Schema<IUserOrders>({
+  productName: {
+    type: String,
+    required: [true, "productName is required"],
+  },
+  price: {
+    type: Number,
+    required: [true, "price is required"],
+  },
+  quantity: {
+    type: Number,
+    required: [true, "quantity is required"],
+  },
+});
 
 // parent schema --->
-const userSchema = new Schema<IUser>({
+const userSchema = new Schema<IUser, UserModel>({
   userId: {
     type: Number,
     required: [true, "userId is required"],
@@ -65,6 +67,7 @@ const userSchema = new Schema<IUser>({
     type: String,
     required: [true, "password is required"],
     maxlength: [20, "Password cannot be more than 20 characters"],
+    select: false,
   },
   fullName: {
     type: userNameSchema,
@@ -77,21 +80,16 @@ const userSchema = new Schema<IUser>({
   email: {
     type: String,
     required: [true, "Email is required"],
+    lowercase: true,
   },
   isActive: {
     type: Boolean,
     required: [true, "isActive is required"],
   },
-  hobbies: {
-    type: [String],
-    enum: {
-      values: ["Traveling", "Playing"],
-      message: "{VALUE} is not a valid hobby",
-    },
-    required: [true, "Hobbies are required"],
-  },
+  hobbies: { type: [String], default: [], trim: true },
   address: userAddressSchema,
-  // orders: userOrdersSchema,
+  orders: { type: [userOrdersSchema], select: false },
+ 
 });
 
 // data control middleware
@@ -104,13 +102,37 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-userSchema.post("save", async function (doc, next) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+userSchema.post("save", async function (doc: any, next) {
   // Completely removing the password field from the document
-  //  doc.password = ''
-
-  doc.updateOne({ userId: this.userId }, { $unset: { password: 1 } });
+  console.log(doc);
+  doc.password = undefined;
+  doc.orders = undefined;
+  doc.__v = undefined;
 
   next();
 });
 
-export const User = model<IUser>("User", userSchema);
+//retrieve the necessary information.
+userSchema.pre("find", function (next) {
+  this.select("username fullName age email address");
+  // this.find({ isDeleted: { $ne: true } });
+  next();
+});
+
+// userSchema.pre("findOne", function (next) {
+//   this.find({ isDeleted: { $ne: true } });
+//   next();
+// });
+
+// creating a custom static method
+userSchema.statics.isUserExists = async function (userId: number) {
+  const existingUser = await User.findOne({ userId });
+
+  return existingUser;
+};
+
+// /// query middleware
+// userNameSchema.pre("find");
+
+export const User = model<IUser, UserModel>("User", userSchema);
