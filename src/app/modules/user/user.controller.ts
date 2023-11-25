@@ -190,13 +190,13 @@ const getTotalPriceInOrders = async (req: Request, res: Response) => {
     const parseId = parseInt(req.params.userId);
 
     const result = await UserServices.totalPriceIntoOrder(parseId);
-    console.log(result);
+
 
     res.status(200).json({
       success: true,
       message: "Total price calculated successfully!",
       data: {
-        totalPrice: parseFloat(result.toFixed(2)),
+        totalPrice: parseFloat(result.toFixed(2)) ,
       },
     });
 
