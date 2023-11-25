@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { User } from "./../user.model";
 import { IUser, IUserOrders } from "./user.interface";
+import UserValidationSchema from "./user.validation";
 
 const createUserIntoDB = async (userData: IUser) => {
   // static method
@@ -56,6 +57,17 @@ const updateUserFromDB = async (userId: number, userData: Partial<IUser>) => {
   if (!userExists) {
     throw new Error("User not found");
   }
+
+  // Validate the updated data using Joi schema
+  const { error } = UserValidationSchema.validate(userData, {
+    abortEarly: false, // Collect all validation errors
+  });
+
+  if (error) {
+    const validationErrors = error.details.map((detail) => detail.message);
+    throw new Error(`Validation error: ${validationErrors.join(", ")}`);
+  }
+
   const result = await User.updateOne(
     { userId },
     { $set: userData },
@@ -117,7 +129,7 @@ const totalPriceIntoOrder = async (userId: number) => {
     0
   );
 
-  
+
   return totalPrice;
 };
 

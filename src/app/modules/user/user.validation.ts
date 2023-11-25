@@ -2,8 +2,8 @@ import Joi from "joi";
 
 // Subtype for Joi validation
 const UsernameValidationSchema = Joi.object({
-  firstName: Joi.string().min(1).max(255),
-  lastName: Joi.string().min(1).max(255),
+  firstName: Joi.string().min(1).max(255).required(),
+  lastName: Joi.string().min(1).max(255).required()
 });
 
 const UserAddressValidationSchema = Joi.object({
@@ -22,7 +22,7 @@ const UserOrdersValidationSchema = Joi.object({
 // Main Joi validation schema
 const UserValidationSchema = Joi.object({
   userId: Joi.number(),
-  username: Joi.string().min(1).max(200),
+  username: Joi.string().min(1).max(20).required(),
   password: Joi.string().min(1).max(20),
   fullName: UsernameValidationSchema,
   age: Joi.number().integer(),
