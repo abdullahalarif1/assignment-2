@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { User } from "./../user.model";
-import { IUser } from "./user.interface";
+import { IUser, IUserOrders } from "./user.interface";
 
 const createUserIntoDB = async (userData: IUser) => {
   // static method
@@ -8,9 +8,6 @@ const createUserIntoDB = async (userData: IUser) => {
     throw new Error("User already exists");
   }
 
-  // const { orders, ...userDataWithoutOrdersAndV } = userData;
-  // const user = new User(userDataWithoutOrdersAndV);
-  // const result = await user.save();
   const result = await User.create(userData);
 
   return result;
@@ -53,6 +50,7 @@ const deleteUserFromDB = async (userId: number) => {
 
 const updateUserFromDB = async (userId: number, userData: Partial<IUser>) => {
   // Use static method to check if the user exists
+
   const userExists = await User.isUserExists(userId);
 
   if (!userExists) {
@@ -66,10 +64,70 @@ const updateUserFromDB = async (userId: number, userData: Partial<IUser>) => {
   return result;
 };
 
+const addProductIntoOrder = async (
+  userId: number,
+  productData: IUserOrders
+) => {
+  // Use static method to check if the user exists
+  const userExists = await User.isUserExists(userId);
+
+  if (!userExists) {
+    throw new Error("User not found");
+  }
+
+  const result = await User.findOneAndUpdate(
+    { userId },
+    { $push: { orders: productData } },
+    { new: true }
+  );
+  return result;
+};
+
+const getOrdersForUser = async (userId: number) => {
+  // Use static method to check if the user exists
+  const userExists = await User.isUserExists(userId);
+
+  if (!userExists) {
+    throw new Error("User not found");
+  }
+
+  const result = await User.findOne({ userId });
+  if (!result) {
+    throw new Error("User not found");
+  }
+  return result.orders;
+};
+
+const totalPriceIntoOrder = async (userId: number) => {
+  const result = await User.findOne({ userId });
+  // Use static method to check if the user exists
+  const userExists = await User.isUserExists(userId);
+
+  if (!userExists) {
+    throw new Error("User not found");
+  }
+
+  if (!result) {
+    throw new Error("User not found");
+  }
+
+  const orders = result.orders || [];
+  const totalPrice = orders.reduce(
+    (acc, order) => acc + order.price * order.quantity,
+    0
+  );
+
+  
+  return totalPrice;
+};
+
 export const UserServices = {
   createUserIntoDB,
   getAllUsersFromDB,
   getSingleUserFromDB,
   deleteUserFromDB,
   updateUserFromDB,
+  addProductIntoOrder,
+  getOrdersForUser,
+  totalPriceIntoOrder,
 };
